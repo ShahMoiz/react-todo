@@ -1,0 +1,8 @@
+Functionality Adding in React Todo App
+
+1) Add Item (done)
+2) Modify Item (done)
+3) Delete Item (done)
+4) Todo is Done Option (done)
+5) Adding Router in Todo App
+6) Search Todo
