@@ -12,9 +12,9 @@ export default class AddTodo extends Component {
         return (
                 <MDBContainer key={todos.id}>
                     <MDBCard className="card-body" style={{ width: "500px", margin: "0 auto", marginTop: "10px", marginBottom: "10px" }}>
-                        <MDBCardTitle>{todos.taskName}</MDBCardTitle>
+                        <MDBCardTitle>{todos.todoName}</MDBCardTitle>
                         <MDBCardText>
-                            Add Layout Functionality Coming Soon
+                            {todos.todoAddInfo}
                         </MDBCardText>
                         <div className="flex-row">
                             <MDBBtn  onClick={() => dltTodo(todos.id)} color="danger">Delete Todo</MDBBtn>

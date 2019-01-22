@@ -2,6 +2,12 @@ import React, { Component } from 'react';
 import { MDBCard, MDBCardTitle, MDBCardText, MDBContainer, MDBInput, MDBBtn  } from "mdbreact";
 
 export default class AddTodo extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            additionalToggle :false,
+        }
+    }
     addTodoChild = (e) => {
         // console.log("Add to Child Run",)
         this.props.addTodo(e);
@@ -16,9 +22,12 @@ export default class AddTodo extends Component {
     //     console.log("check editTask Child Value", e.target.value)
     // this.props.editTask(e);
     // }
-
+    showInfoTextArea = () => {
+        const bool = !this.state.additionalToggle
+        this.setState({additionalToggle: bool})
+    }
     render() {
-        const { value, editTaskAA, isCompleted } = this.props;
+        const { value, editTaskAA, infoValue } = this.props;
         return (
 
             <div key={1}>
@@ -27,6 +36,10 @@ export default class AddTodo extends Component {
                         <MDBCardTitle>Add Todo</MDBCardTitle>
                         <MDBCardText >
                             <MDBInput label="Add Your Todo" value={value} onChange={this.addTodoChild}/>
+                            {(this.state.additionalToggle) ? <a href="javascript:void(0)" onClick={() => this.showInfoTextArea()}>Hide Additional Info</a> :
+                                                            <a href="javascript:void(0)" onClick={() => this.showInfoTextArea()}>Show Additional Info</a>}
+                            { (this.state.additionalToggle) && <MDBInput value={infoValue} onChange={(e) => this.props.addInfo(e)} type="textarea"
+                                                                 label="Add Additional Info" rows="2" />}
                         </MDBCardText>
                             {
                                 (editTaskAA.editButton) ? <MDBBtn  onClick={() => this.props.editTask()} color="cyan">Edit Todo</MDBBtn> :

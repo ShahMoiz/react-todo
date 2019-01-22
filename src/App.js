@@ -5,10 +5,18 @@ import { Route, Link } from "react-router-dom";
 import AddTodo from './AddTodo/addTodo.js'
 import Table from './Table/table.js';
 import Nav from './header/navbar/nav';
-import Home from './Home/home.js'
-var todosCompORIncomp =''
-const todos = [{ taskName: 'Do Homework', id: 0, isCompleted: false }]
+// import Home from './Home/home.js';
+//Route Todos/:id functionaliy
+var todosCompORIncomp = '';
+
+// Dummy Text for Todo Additional Info
+const addInfoTextDummy = 'Add Additional Info for Remembreing Task';
+const todos = [{ todoName: 'Do Homework', id: 0, isCompleted: false, todoAddInfo: addInfoTextDummy }];
+
+//Route /todos functionaliy
 var todosComponent = '';
+
+//Create Unique ID
 function makeid() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -17,6 +25,7 @@ function makeid() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
 }
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -25,9 +34,10 @@ class App extends Component {
       todos,
       todoAddInputValue: '',
       editTaskAfterAdded: { editButton: false, id: null },
+      searchTodoValue: '',
+      todoAddInfoValue: ''
 
     }
-    // this.addTaskFunc = this.addTaskFunc.bind(this)
   }
 
   //Change Input Value have
@@ -37,17 +47,17 @@ class App extends Component {
 
   // Add Todo in todos List
   addTaskFunc = () => {
-    const todoObject = { taskName: this.state.todoAddInputValue, id: makeid() };
+    const todoObject = { todoName: this.state.todoAddInputValue, id: makeid(), isCompleted: false,
+                     todoAddInfo: (this.state.todoAddInfoValue == '') ? addInfoTextDummy: this.state.todoAddInfoValue };
     this.state.todos.push(todoObject);
     this.setState({ todos, todoAddInputValue: '' });
   }
 
-  //this function works to maniplute data in Input Fiels this func is in Table Component
   editTaskTable = (id) => {
     const getTask = this.state.todos.filter((todos) => todos.id === id);
     const editTaskAfterAdded = { editButton: true, id: id }
 
-    this.setState({ editTaskAfterAdded, todoAddInputValue: getTask[0].taskName });
+    this.setState({ editTaskAfterAdded, todoAddInputValue: getTask[0].todoName });
   }
 
   // this func is successefully complete edit this func is in AddTodo component  
@@ -56,9 +66,9 @@ class App extends Component {
     const fetchID = this.state.editTaskAfterAdded.id;
     const findReqTodo = this.state.todos.filter((todos) => todos.id === fetchID);
 
-    findReqTodo.map(todo => todo.taskName = this.state.todoAddInputValue)
+    findReqTodo.map(todo => {todo.todoName = this.state.todoAddInputValue; todo.todoAddInfo = this.state.todoAddInfoValue})
 
-    this.setState({ todos, editTaskAfterAdded, todoAddInputValue: '' });
+    this.setState({ todos, editTaskAfterAdded, todoAddInputValue: ''});
   }
   dltTodo = (id) => {
     const modiTodo = this.state.todos.filter((todo) => todo.id !== id);
@@ -81,10 +91,25 @@ class App extends Component {
       return ((todo.isComplete) && todo)
     }
   }
+  searchTodo = (e) => {
+    this.setState({searchTodoValue: e.target.value})
+    // console.log(this.state.searchTodoValue);
+  }
+  filterTodo(searchTodo){
+    return function(todo){
+      return todo.todoName.toLowerCase().includes(searchTodo.toLowerCase())
+    }
+  }
+  additionalInfo = (e) => {
+    this.setState({todoAddInfoValue: e.target.value});
+    console.log(this.state.todoAddInfoValue )
+  }
   render() {
     return (
       <div className="App text-center">
-        <Nav></Nav>
+        <Nav
+          searchTodo={this.searchTodo}
+        />
         
         <Route path="/" exact render={() =>
           <div>
@@ -94,16 +119,19 @@ class App extends Component {
               value={this.state.todoAddInputValue}
               editTaskAA={this.state.editTaskAfterAdded}
               editTask={this.editTask}
+              addInfo={this.additionalInfo}
+              infoValue={this.todoAddInfoValue}
             />
             <h1>Todos are Here</h1>
 
             {
-              this.state.todos.map((todos) =>
+              this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
                 <Table
                   todos={todos}
                   editTaskTable={this.editTaskTable}
                   dltTodo={this.dltTodo}
-                  isComplete={this.isComplete} />)
+                  isComplete={this.isComplete}
+                   />)
             }
           </div>
         }
@@ -119,12 +147,13 @@ class App extends Component {
             <Link style={{ color: 'white' }} to={`${match.url}/incompleteTodo`}><MDBBtn color="purple">Show Incomplete Todo</MDBBtn></Link>
 
             {
-              this.state.todos.filter().map((todo) =>
+              this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todo) =>
                 <Table
                   todos={todo}
                   editTaskTable={this.editTaskTable}
                   dltTodo={this.dltTodo}
-                  isComplete={this.isComplete} />
+                  isComplete={this.isComplete}
+                   />
               )
             }
           </div>
@@ -142,12 +171,13 @@ class App extends Component {
               else if(match.params.id == 'incompleteTodo' && !todo.isCompleted){
                 return todo
               }
-              }).map((todo) => 
+              }).filter(this.filterTodo(this.state.searchTodoValue)).map((todo) => 
               <Table
               todos={todo}
               editTaskTable={this.editTaskTable}
               dltTodo={this.dltTodo}
-              isComplete={this.isComplete} />
+              isComplete={this.isComplete}
+               />
               )
             }
               </div>
