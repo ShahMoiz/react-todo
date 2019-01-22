@@ -4,5 +4,10 @@ Functionality Adding in React Todo App
 2) Modify Item (done)
 3) Delete Item (done)
 4) Todo is Done Option (done)
-5) Adding Router in Todo App
-6) Search Todo
+5) Adding Router in Todo App (done)
+6) Search Todo 
+7) Detail Function Adeded
+8) All Bugs Fix
+9) Connect To Firebase
+10) Login Page
+11) Auth Needed
