@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { MDBBtn, MDBNavLink } from "mdbreact";
+import { MDBBtn } from "mdbreact";
 // import './App.css';
 import { Route, Link } from "react-router-dom";
 import AddTodo from './AddTodo/addTodo.js'
@@ -48,7 +48,7 @@ class App extends Component {
   // Add Todo in todos List
   addTaskFunc = () => {
     const todoObject = { todoName: this.state.todoAddInputValue, id: makeid(), isCompleted: false,
-                     todoAddInfo: (this.state.todoAddInfoValue == '') ? addInfoTextDummy: this.state.todoAddInfoValue };
+                     todoAddInfo: (this.state.todoAddInfoValue === '') ? addInfoTextDummy: this.state.todoAddInfoValue };
     this.state.todos.push(todoObject);
     this.setState({ todos, todoAddInputValue: '' });
   }
@@ -66,7 +66,7 @@ class App extends Component {
     const fetchID = this.state.editTaskAfterAdded.id;
     const findReqTodo = this.state.todos.filter((todos) => todos.id === fetchID);
 
-    findReqTodo.map(todo => {todo.todoName = this.state.todoAddInputValue; todo.todoAddInfo = this.state.todoAddInfoValue})
+    findReqTodo.map(todo => { todo.todoName = this.state.todoAddInputValue; todo.todoAddInfo = this.state.todoAddInfoValue})
 
     this.setState({ todos, editTaskAfterAdded, todoAddInputValue: ''});
   }
@@ -78,7 +78,7 @@ class App extends Component {
   }
   // Checkbox functioanlity this is in Table Component
   isComplete = (isChecked, id) => {
-    const isCheckedVar = isChecked == false;
+    const isCheckedVar = isChecked === false;
     const getTodo = this.state.todos.filter((todo) => todo.id === id);
 
     getTodo.map((todo) => todo.isCompleted = isCheckedVar);
@@ -127,6 +127,7 @@ class App extends Component {
             {
               this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
                 <Table
+                  key={todos.id}
                   todos={todos}
                   editTaskTable={this.editTaskTable}
                   dltTodo={this.dltTodo}
@@ -165,10 +166,10 @@ class App extends Component {
               return (
                 <div>
                   <h6><Link to="/todos">Back to Todos</Link></h6>
-                {this.state.todos.filter((todo) =>{ if(match.params.id == 'completeTodo' && todo.isCompleted){
+                {this.state.todos.filter((todo) =>{ if(match.params.id === 'completeTodo' && todo.isCompleted){
                 return todo
               }
-              else if(match.params.id == 'incompleteTodo' && !todo.isCompleted){
+              else if(match.params.id === 'incompleteTodo' && !todo.isCompleted){
                 return todo
               }
               }).filter(this.filterTodo(this.state.searchTodoValue)).map((todo) => 
