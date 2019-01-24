@@ -11,9 +11,9 @@ import Table from './Table/table.js';
 import Nav from './header/navbar/nav';
 import SignUp from './Authentication/Signup/signup.js';
 import Login from './Authentication/Login/login.js';
-var todosCompORIncomp = '';
 
-var config = {
+//Firebase Config in App
+const config = {
   apiKey: "AIzaSyDG2zM4_s8zyQbRWYg26LtQ81UGOa6DxzM",
   authDomain: "react-todo-moiz.firebaseapp.com",
   databaseURL: "https://react-todo-moiz.firebaseio.com",
@@ -22,12 +22,30 @@ var config = {
   messagingSenderId: "82486736503"
 };
 firebase.initializeApp(config);
-// firebase.initializeApp(config);
-var db = firebase.firestore();
+
+// firebase user Status
+var user = firebase.auth().currentUser;
+
+// firebase Database Firestore
+const db = firebase.firestore();
 db.settings({
   timestampsInSnapshots: true
 });
-var options = {};
+
+// Dummy Text for Todo Additional Info
+const addInfoTextDummy = 'Add Additional Info for Remembreing Task';
+
+// initially add todo
+const todos = [{ todoName: 'Do Homework', id: 0, isCompleted: false, todoAddInfo: addInfoTextDummy }];
+
+//declare Var for <Route path="/" component="todosComponent"> functionaliy
+var todosComponent = '';
+
+// declare Var for <Route path="/todos/:id" component="todosCompORIncomp"> functionaliy
+var todosCompORIncomp = '';
+
+//Notification Function
+var options;
 function optionsFunc(msg, type) {
   return options = {
     place: 'br',
@@ -42,13 +60,6 @@ function optionsFunc(msg, type) {
   }
 }
 
-// Dummy Text for Todo Additional Info
-const addInfoTextDummy = 'Add Additional Info for Remembreing Task';
-const todos = [{ todoName: 'Do Homework', id: 0, isCompleted: false, todoAddInfo: addInfoTextDummy }];
-
-//Route /todos functionaliy
-var todosComponent = '';
-
 //Create Unique ID
 function makeid() {
   var text = "";
@@ -58,9 +69,8 @@ function makeid() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
 }
-function Protected() {
-  return <h3>Protected</h3>;
-}
+
+//Redirect Route Example 
 function PrivateRoute({ component: Component, ...rest }) {
   return (
     <Route
@@ -76,7 +86,8 @@ function PrivateRoute({ component: Component, ...rest }) {
     />
   );
 }
-var user = firebase.auth().currentUser;
+
+
 
 // var firebase = require('firebaseui');
 class App extends Component {
@@ -84,11 +95,11 @@ class App extends Component {
     super(props);
 
     this.state = {
-      todos,
-      uniqueId: '',
-      email: '',
-      pass : '',
-      isLogin: '',
+      todos: {},
+      // uniqueId: '',
+      // email: '',
+      // pass : '',
+      // isLogin: '',
       todoAddInputValue: '',
       editTaskAfterAdded: { editButton: false, id: null },
       searchTodoValue: '',
@@ -97,14 +108,18 @@ class App extends Component {
 
     }
   }
-  // () => {
-
-  // })
   //Change Input Value have
   addTodo = (e) => {
     this.setState({ todoAddInputValue: e.target.value })
   }
+  submitTodo = (todoValue, additionalInfo) => {
+    const todoObject = {
+      todoName: todoValue, id: makeid(), isCompleted: false,
+      todoAddInfo: (!additionalInfo) ? addInfoTextDummy : additionalInfo
+    };
+    this.state.todos.push(todoObject);
 
+  }
   // Add Todo in todos List
   addTaskFunc = () => {
     
@@ -287,7 +302,7 @@ class App extends Component {
       <Router>
         <div className="App text-center">
           <button onClick={() => this.check()}>Check </button>
-          <PrivateRoute path="/protected" component={Protected} />
+          {/* <PrivateRoute path="/protected" component={Protected} /> */}
           <Nav
             searchTodo={this.searchTodo}
           />
@@ -307,7 +322,7 @@ class App extends Component {
                 addInfo={this.additionalInfo}
                 infoValue={this.todoAddInfoValue}
               />
-               { this.check() }
+               {/* { this.check() } */}
               <h1>Todos are Here</h1>
               {/* .filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
                     <Table
