@@ -9,19 +9,22 @@ export default class AddTodo extends Component {
         this.state = {
             additionalToggle: false,
             disabledAddButton: true,
-            TodoValue: '',
+            todoValue: '',
             additionalTodoValue: '',
+            addTaskValue: ''
         }
     }
     addTodoChild = (e) => {
-        const addTaskValue = e.target.value;
-        this.props.addTodo(e);
-        (!addTaskValue) ? this.setState({ disabledAddButton: true }) : this.setState({ disabledAddButton: false })
+        this.setState({todoValue: e.target.value, addTaskValue:e.target.value});
+        (!this.state.addTaskValue) ? this.setState({ disabledAddButton: true }) : this.setState({ disabledAddButton: false });
+        // this.props.addTodo(e);
     }
 
-    addTaskChild = (e) => {
-        this.setState({TodoValue: e.target.value})
-    }
+    // addTaskChild = (e) => {
+    //     this.setState({todoValue: e.target.value});
+    //     console.log("Todo Value", this.state.todoValue);
+        
+    // }
     showInfoTextArea = () => {
         const bool = !this.state.additionalToggle
         this.setState({ additionalToggle: bool })
@@ -32,7 +35,7 @@ export default class AddTodo extends Component {
     }
     render() {
         const { value, editTaskAA,submitTodo } = this.props;
-        const {TodoValue,additionalTodoValue} = this.state;
+        const {todoValue,additionalTodoValue} = this.state;
         return (
 
             <div>
@@ -41,9 +44,9 @@ export default class AddTodo extends Component {
                         <MDBCardTitle>Add Todo</MDBCardTitle>
                         <form onSubmit={(e) => {
                             e.preventDefault();
-                            submitTodo(TodoValue,additionalTodoValue)
+                            submitTodo(todoValue,additionalTodoValue)
                         }}>
-                        <MDBInput label="Add Your Todo" value={value} onChange={this.addTodoChild} />
+                        <MDBInput label="Add Your Todo" onChange={(e) => this.addTodoChild(e)} />
 
                         {/* Show or Hide Additional Info */}
                         {
@@ -56,12 +59,12 @@ export default class AddTodo extends Component {
                         {
                             // If toggle is true then Show Additional info Text box
                             (this.state.additionalToggle) &&
-                            <MDBInput value="" onChange={(e) => this.addInfo(e)} type="textarea" label="Add Additional Info" rows="2" />
+                            <MDBInput onChange={(e) => this.addInfo(e)} type="textarea" label="Add Additional Info" rows="2" />
                         }
-
+ 
                         {
                             // if Todo is Edit then show "Edit Todo" button else show "Add Todo" button
-                            (editTaskAA.editButton) ? <MDBBtn disabled={this.state.disabledAddButton} type="submit" color="cyan">Edit Todo</MDBBtn> :
+                            (editTaskAA.editButton) ? <MDBBtn disabled={this.state.disabledAddButton} color="cyan">Edit Todo</MDBBtn> :
                                 <MDBBtn disabled={this.state.disabledAddButton} type="submit" color="success">Add Task</MDBBtn>
                         }
                         </form>

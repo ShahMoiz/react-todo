@@ -36,7 +36,7 @@ db.settings({
 const addInfoTextDummy = 'Add Additional Info for Remembreing Task';
 
 // initially add todo
-const todos = [{ todoName: 'Do Homework', id: 0, isCompleted: false, todoAddInfo: addInfoTextDummy }];
+// const todos = [{ todoName: 'Do Homework', id: 0, isCompleted: false, todoAddInfo: addInfoTextDummy }];
 
 //declare Var for <Route path="/" component="todosComponent"> functionaliy
 var todosComponent = '';
@@ -46,7 +46,7 @@ var todosCompORIncomp = '';
 
 //Notification Function
 var options;
-function optionsFunc(msg, type) {
+function optionsFunc(msg, type, dismiss) {
   return options = {
     place: 'br',
     message: (
@@ -56,7 +56,7 @@ function optionsFunc(msg, type) {
     ),
     type: type,
     // icon: "now-ui-icons ui-1_bell-53",
-    autoDismiss: 3
+    autoDismiss: 3 | dismiss
   }
 }
 
@@ -71,21 +71,21 @@ function makeid() {
 }
 
 //Redirect Route Example 
-function PrivateRoute({ component: Component, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      render={props =>
-        <Redirect
-          to={{
-            pathname: "/login",
-            state: { from: props.location }
-          }}
-        />
-      }
-    />
-  );
-}
+// function PrivateRoute({ component: Component, ...rest }) {
+//   return (
+//     <Route
+//       {...rest}
+//       render={props =>
+//         <Redirect
+//           to={{
+//             pathname: "/login",
+//             state: { from: props.location }
+//           }}
+//         />
+//       }
+//     />
+//   );
+// }
 
 
 
@@ -95,63 +95,95 @@ class App extends Component {
     super(props);
 
     this.state = {
-      todos: {},
-      // uniqueId: '',
-      // email: '',
-      // pass : '',
-      // isLogin: '',
-      todoAddInputValue: '',
+      todos: [],
+      todosIsEmpty: false,
+      // todoAddInputValue: '',
       editTaskAfterAdded: { editButton: false, id: null },
       searchTodoValue: '',
-      todoAddInfoValue: '',
+      // todoAddInfoValue: '',
       getIsCompleteID: ''
 
     }
   }
   //Change Input Value have
-  addTodo = (e) => {
-    this.setState({ todoAddInputValue: e.target.value })
-  }
+  // addTodo = (e) => {
+  //   this.setState({ todoAddInputValue: e.target.value })
+  // }
+
+  // Add Todo Button Functionality
+
+
+
+
+
   submitTodo = (todoValue, additionalInfo) => {
+    //Value Added in single variable
     const todoObject = {
       todoName: todoValue, id: makeid(), isCompleted: false,
       todoAddInfo: (!additionalInfo) ? addInfoTextDummy : additionalInfo
     };
     this.state.todos.push(todoObject);
 
-  }
-  // Add Todo in todos List
-  addTaskFunc = () => {
-    
-    const todoObject = {
-      todoName: this.state.todoAddInputValue, id: makeid(), isCompleted: false,
-      todoAddInfo: (this.state.todoAddInfoValue === '') ? addInfoTextDummy : this.state.todoAddInfoValue
-    };
-    this.state.todos.push(todoObject);
-    this.refs.notify.notificationAlert(optionsFunc("Added Successefully", 'success'));
-    this.setState({ todos, todoAddInputValue: '' });
-    if (user) {
-      // var userName = user.email.split("@");
-      // console.log(userName[0])
 
+    if (user) {
       var a = db.doc(`users/${user.email}`)
       a.set({
-        todos,
+        todos: this.state.todos,
       }).then(() => {
-        console.log("Saved Your Name");
+    //Notification
+    this.refs.notify.notificationAlert(optionsFunc("Added Successefully in your Database", 'success'));
+        a.get().then((doc) => {
+          (doc.exists) && this.setState({todos: doc.data().todos});
+        })
       }).catch((error) => {
         console.log(error.code);
         console.log(error.message);
       })
      } else {
-      
+       
+    this.refs.notify.notificationAlert(optionsFunc(<div><h6>Added Successefully</h6><p>But Your todo is not Save please<Link to="/login">Login</Link> Here</p></div>, 'info', 6));
+    this.setState({ todos: this.state.todos, todosIsEmpty: true });
     console.log("User not signin");
       // No user is signed in.
     }
-    
-    
-    
+
+
   }
+
+
+
+  // Add Todo in todos List
+  // addTaskFunc = () => {
+    
+  //   const todoObject = {
+  //     todoName: this.state.todoAddInputValue, id: makeid(), isCompleted: false,
+  //     todoAddInfo: (this.state.todoAddInfoValue === '') ? addInfoTextDummy : this.state.todoAddInfoValue
+  //   };
+  //   this.state.todos.push(todoObject);
+  //   this.refs.notify.notificationAlert(optionsFunc("Added Successefully", 'success'));
+  //   this.setState({ todos, todoAddInputValue: '' });
+  //   if (user) {
+  //     // var userName = user.email.split("@");
+  //     // console.log(userName[0])
+
+  //     var a = db.doc(`users/${user.email}`)
+  //     a.set({
+  //       todos,
+  //     }).then(() => {
+  //       console.log("Saved Your Name");
+  //     }).catch((error) => {
+  //       console.log(error.code);
+  //       console.log(error.message);
+  //     })
+  //    } else {
+      
+  //   console.log("User not signin");
+  //     // No user is signed in.
+  //   }
+    
+    
+    
+  // }
 
   editTaskTable = (id) => {
     const getTask = this.state.todos.filter((todos) => todos.id === id);
@@ -170,7 +202,7 @@ class App extends Component {
     this.refs.notify.notificationAlert(optionsFunc("Edit Successfully", 'success'));
     findReqTodo.map(todo => { todo.todoName = this.state.todoAddInputValue; todo.todoAddInfo = this.state.todoAddInfoValue })
 
-    this.setState({ todos, editTaskAfterAdded, todoAddInputValue: '' });
+    this.setState({ todos: this.state.todos, editTaskAfterAdded, todoAddInputValue: '' });
   }
   dltTodo = (id) => {
     const modiTodo = this.state.todos.filter((todo) => todo.id !== id);
@@ -188,7 +220,7 @@ class App extends Component {
     console.log("IS Complete Get Todo", getTodo)
     getTodo.map((todo) => todo.isCompleted = !todo.isCompleted);
 
-    this.setState({ todos });
+    this.setState({ todos: this.state.todos });
     console.log("get Todos", this.state.todos)
   }
 
@@ -221,10 +253,10 @@ class App extends Component {
     // })
     
   }
-  additionalInfo = (e) => {
-    this.setState({ todoAddInfoValue: e.target.value });
-    console.log(this.state.todoAddInfoValue)
-  }
+  // additionalInfo = (e) => {
+  //   this.setState({ todoAddInfoValue: e.target.value });
+  //   console.log(this.state.todoAddInfoValue)
+  // }
   getID = (id) => {
     console.log("Get ID ", id)
     this.setState({ getIsCompleteID: id })
@@ -265,7 +297,7 @@ class App extends Component {
       this.refs.notify.notificationAlert(optionsFunc(`Login Successufully`, 'success'))
       const docRef = db.doc(`users/${email}`)
       docRef.get().then((doc) =>{
-        (doc.exists) ? this.setState({todos: doc.data().todos}) : this.setState({todos})
+        (doc.exists) ? this.setState({todos: doc.data().todos}) : this.setState({todos: this.state.todos})
       }
     )
     
@@ -284,17 +316,17 @@ class App extends Component {
 
   }
 
-  check = () => {
-    const a = db.doc("users/a");
-    a.get().then((doc) => {
-      if (doc.exists) {
-        console.log("Document data:", doc.data().todos);
-        this.setState({todos: doc.data().todos})
-    } else {
-        // doc.data() will be undefined in this case
-        console.log("No such document!");
-    }})
-  }
+  // check = () => {
+  //   const a = db.doc("users/a");
+  //   a.get().then((doc) => {
+  //     if (doc.exists) {
+  //       console.log("Document data:", doc.data().todos);
+  //       this.setState({todos: doc.data().todos})
+  //   } else {
+  //       // doc.data() will be undefined in this case
+  //       console.log("No such document!");
+  //   }})
+  // }
 
   render() {
     // var getTodos = db.collection('users').doc('a')
@@ -314,28 +346,15 @@ class App extends Component {
           <Route path="/" exact render={() =>
             <div>
               <AddTodo
-                addTodo={this.addTodo}
-                addTask={this.addTaskFunc}
-                value={this.state.todoAddInputValue}
                 editTaskAA={this.state.editTaskAfterAdded}
                 editTask={this.editTask}
-                addInfo={this.additionalInfo}
-                infoValue={this.todoAddInfoValue}
+                submitTodo={this.submitTodo}
               />
                {/* { this.check() } */}
               <h1>Todos are Here</h1>
-              {/* .filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
-                    <Table
-                      key={todos.id}
-                      todos={todos}
-                      editTaskTable={this.editTaskTable}
-                      dltTodo={this.dltTodo}
-                      isComplete={this.isComplete}
-                      getID={this.getID}
-                    />) */}
               
                 { 
-               
+               (this.state.todosIsEmpty) ?
                 this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
                   <Table
                     key={todos.id}
@@ -344,7 +363,7 @@ class App extends Component {
                     dltTodo={this.dltTodo}
                     isComplete={this.isComplete}
                     getID={this.getID}
-                  />)
+                  />) : "Todos Emprty"
               }
             </div>
           }
