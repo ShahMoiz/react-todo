@@ -1,11 +1,19 @@
 import React, { Component } from 'react';
 import { MDBBtn } from "mdbreact";
 import {BrowserRouter as Router, Route, Link } from "react-router-dom";
+
+
+// import * as firebase from 'firebaseui'
+// var firebaseui = require('firebaseui');
+// or for ES6 imports.
+// import * as firebaseui from 'firebaseui'
 import NotificationAlert from 'react-notification-alert';
 import "react-notification-alert/dist/animate.css";
 import AddTodo from './AddTodo/addTodo.js'
 import Table from './Table/table.js';
 import Nav from './header/navbar/nav';
+import SignUp from './Authentication/Signup/signup.js'
+import Login from './Authentication/Login/login.js'
 const baseUrl = process.env.PUBLIC_URL;
 var todosCompORIncomp = '';
 
@@ -40,7 +48,7 @@ function makeid() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
 }
-
+var firebase = require('firebaseui');
 class App extends Component {
   constructor(props) {
     super(props);
@@ -131,6 +139,17 @@ class App extends Component {
     console.log("Get ID ", id)
     this.setState({getIsCompleteID: id})
   }
+  signupSubmit = (email, pass, rePass) => {
+    console.log("email", email );
+    console.log("pass", pass );
+    console.log("rePass", rePass );
+    (pass === rePass) ? firebase.auth().createUserWithEmailAndPassword(email, pass).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // ...
+    }) : console.log("Error Error");
+  }
   render() {
     return (
       <Router>
@@ -220,8 +239,19 @@ class App extends Component {
         {
           this.state.todoAddInputValue
         }
+        <Route path="/auth" render={() =>
+          <SignUp
+          signupSubmit={this.signupSubmit}
+          />
+        }></Route>
+        <Route path="/login" component={Login}></Route>
       </div>
+
+      
+      {/* <Signup></Signup> */}
       </Router>
+
+        
     );
   }
 }
