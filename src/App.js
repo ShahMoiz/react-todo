@@ -70,6 +70,7 @@ function makeid() {
   return text;
 }
 
+
 //Redirect Route Example 
 // function PrivateRoute({ component: Component, ...rest }) {
 //   return (
@@ -96,7 +97,7 @@ class App extends Component {
 
     this.state = {
       todos: [],
-      todosIsEmpty: false,
+      todosIsEmpty: true,
       // todoAddInputValue: '',
       editTaskAfterAdded: { editButton: false, id: null },
       searchTodoValue: '',
@@ -105,6 +106,37 @@ class App extends Component {
 
     }
   }
+  componentDidMount() {
+    setTimeout(() => {
+      var user = firebase.auth().currentUser;
+      
+    console.log( "user Not Login", user);
+    if(user){
+      var getData = db.doc(`users/${user.email}`);
+      getData.get().then((doc) => {
+        (doc.exists) && this.setState({todos: doc.data().todos, todosIsEmpty: false})
+      })
+    }
+    else {
+      console.log( "user Not Login");
+    }
+    }, 1600);
+      
+      // window.addEventListener('load', this.handleLoad);
+   }
+   handleLoad = () => {
+    // firebase user Status
+    var user = firebase.auth().currentUser;
+    if(user){
+      var getData = db.doc(`users/${user.email}`);
+      getData.get().then((doc) => {
+        (doc.exists) && this.setState({todos: doc.data().todos, todosIsEmpty: false})
+      })
+    }
+    else {
+      console.log( "user Not Login");
+    }
+}
   //Change Input Value have
   // addTodo = (e) => {
   //   this.setState({ todoAddInputValue: e.target.value })
@@ -124,27 +156,30 @@ class App extends Component {
     };
     this.state.todos.push(todoObject);
 
-
+    // firebase user Status
+    var user = firebase.auth().currentUser;
     if (user) {
-      var a = db.doc(`users/${user.email}`)
-      a.set({
+      var getData = db.doc(`users/${user.email}`)
+      getData.set({
         todos: this.state.todos,
       }).then(() => {
-    //Notification
-    this.refs.notify.notificationAlert(optionsFunc("Added Successefully in your Database", 'success'));
-        a.get().then((doc) => {
-          (doc.exists) && this.setState({todos: doc.data().todos});
+        //Notification
+        this.refs.notify.notificationAlert(optionsFunc("Added Successefully in your Database", 'success'));
+        getData.get().then((doc) => {
+          (doc.exists) && this.setState({ todos: doc.data().todos, todosIsEmpty: false });
+        }).catch((error) => {
+          console.log("Getting Data Error", error)
         })
       }).catch((error) => {
         console.log(error.code);
         console.log(error.message);
       })
-     } else {
-       
-    this.refs.notify.notificationAlert(optionsFunc(<div><h6>Added Successefully</h6><p>But Your todo is not Save please<Link to="/login">Login</Link> Here</p></div>, 'info', 6));
-    this.setState({ todos: this.state.todos, todosIsEmpty: true });
-    console.log("User not signin");
-      // No user is signed in.
+
+    } else {
+
+      this.refs.notify.notificationAlert(optionsFunc(<div><h6>Added Successefully</h6><p>But Your todo is not Save please<Link to="/login">Login</Link> Here</p></div>, 'info', 6));
+      this.setState({ todos: this.state.todos, todosIsEmpty: false });
+
     }
 
 
@@ -317,23 +352,31 @@ class App extends Component {
   }
 
   // check = () => {
-  //   const a = db.doc("users/a");
+  //   const a = db.doc("users/a@h.com");
   //   a.get().then((doc) => {
   //     if (doc.exists) {
-  //       console.log("Document data:", doc.data().todos);
+  //       // console.log("Document data:", doc.data().todos);
   //       this.setState({todos: doc.data().todos})
   //   } else {
   //       // doc.data() will be undefined in this case
   //       console.log("No such document!");
   //   }})
   // }
-
+  // signOut = () => {
+  //   firebase.auth().signOut().then(() => {
+  //     console.log("Successefully Sign Out");
+  //   }).catch((error) => {
+  //     console.log(error);
+      
+  //   })
+  // }
   render() {
     // var getTodos = db.collection('users').doc('a')
     return (
       <Router>
         <div className="App text-center">
-          <button onClick={() => this.check()}>Check </button>
+          <button onClick={()=> this.signOut()}> signOut </button>
+          <button onClick={() => this.check()}>check</button>
           {/* <PrivateRoute path="/protected" component={Protected} /> */}
           <Nav
             searchTodo={this.searchTodo}
@@ -354,7 +397,7 @@ class App extends Component {
               <h1>Todos are Here</h1>
               
                 { 
-               (this.state.todosIsEmpty) ?
+               (!this.state.todosIsEmpty) ?
                 this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
                   <Table
                     key={todos.id}
@@ -363,7 +406,7 @@ class App extends Component {
                     dltTodo={this.dltTodo}
                     isComplete={this.isComplete}
                     getID={this.getID}
-                  />) : "Todos Emprty"
+                  />) : "wait while Fetching your data in Server or Either Todos Empty"
               }
             </div>
           }
