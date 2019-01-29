@@ -117,26 +117,26 @@ class App extends Component {
         (doc.exists) && this.setState({todos: doc.data().todos, todosIsEmpty: false})
       })
     }
-    else {
-      console.log( "user Not Login");
-    }
-    }, 1600);
+    // else {
+    //   console.log( "user Not Login");
+    // }
+    }, 2500);
       
       // window.addEventListener('load', this.handleLoad);
    }
-   handleLoad = () => {
-    // firebase user Status
-    var user = firebase.auth().currentUser;
-    if(user){
-      var getData = db.doc(`users/${user.email}`);
-      getData.get().then((doc) => {
-        (doc.exists) && this.setState({todos: doc.data().todos, todosIsEmpty: false})
-      })
-    }
-    else {
-      console.log( "user Not Login");
-    }
-}
+//    handleLoad = () => {
+//     // firebase user Status
+//     var user = firebase.auth().currentUser;
+//     if(user){
+//       var getData = db.doc(`users/${user.email}`);
+//       getData.get().then((doc) => {
+//         (doc.exists) && this.setState({todos: doc.data().todos, todosIsEmpty: false})
+//       })
+//     }
+//     else {
+//       console.log( "user Not Login");
+//     }
+// }
   //Change Input Value have
   // addTodo = (e) => {
   //   this.setState({ todoAddInputValue: e.target.value })
@@ -159,7 +159,7 @@ class App extends Component {
     // firebase user Status
     var user = firebase.auth().currentUser;
     if (user) {
-      var getData = db.doc(`users/${user.email}`)
+      var getData = db.doc(`users/${user.email}`);
       getData.set({
         todos: this.state.todos,
       }).then(() => {
@@ -168,11 +168,10 @@ class App extends Component {
         getData.get().then((doc) => {
           (doc.exists) && this.setState({ todos: doc.data().todos, todosIsEmpty: false });
         }).catch((error) => {
-          console.log("Getting Data Error", error)
+          this.refs.notify.notificationAlert(optionsFunc(error.message, 'danger'));
         })
       }).catch((error) => {
-        console.log(error.code);
-        console.log(error.message);
+        this.refs.notify.notificationAlert(optionsFunc(error.message, 'danger'));
       })
 
     } else {
@@ -186,39 +185,6 @@ class App extends Component {
   }
 
 
-
-  // Add Todo in todos List
-  // addTaskFunc = () => {
-    
-  //   const todoObject = {
-  //     todoName: this.state.todoAddInputValue, id: makeid(), isCompleted: false,
-  //     todoAddInfo: (this.state.todoAddInfoValue === '') ? addInfoTextDummy : this.state.todoAddInfoValue
-  //   };
-  //   this.state.todos.push(todoObject);
-  //   this.refs.notify.notificationAlert(optionsFunc("Added Successefully", 'success'));
-  //   this.setState({ todos, todoAddInputValue: '' });
-  //   if (user) {
-  //     // var userName = user.email.split("@");
-  //     // console.log(userName[0])
-
-  //     var a = db.doc(`users/${user.email}`)
-  //     a.set({
-  //       todos,
-  //     }).then(() => {
-  //       console.log("Saved Your Name");
-  //     }).catch((error) => {
-  //       console.log(error.code);
-  //       console.log(error.message);
-  //     })
-  //    } else {
-      
-  //   console.log("User not signin");
-  //     // No user is signed in.
-  //   }
-    
-    
-    
-  // }
 
   editTaskTable = (id) => {
     const getTask = this.state.todos.filter((todos) => todos.id === id);
@@ -244,7 +210,42 @@ class App extends Component {
     console.log("Delete Current Id,", modiTodo);
     // dltCurrentTodo.map((todo) => todo.)
     this.refs.notify.notificationAlert(optionsFunc("Delete Successfully", 'danger'));
-    this.setState({ todos: modiTodo })
+    
+    // firebase user Status
+    var user = firebase.auth().currentUser;
+    if (user) {
+      var getData = db.doc(`users/${user.email}`);
+      getData.get().then((doc) => {
+        if(doc.exists){
+          const dbgetTodo = doc.data().todos.filter((todo) => todo.id !==id);
+          console.log("Paki",dbgetTodo);
+          this.setState({ todos: dbgetTodo });
+          getData.set({
+            todos: dbgetTodo
+          })
+        }
+      })
+      // getData.set({
+      //   todos: this.state.todos,
+      // }).then(() => {
+      //   //Notification
+      //   this.refs.notify.notificationAlert(optionsFunc("Added Successefully in your Database", 'success'));
+      //   getData.get().then((doc) => {
+      //     (doc.exists) && this.setState({ todos: doc.data().todos, todosIsEmpty: false });
+      //   }).catch((error) => {
+      //     console.log("Getting Data Error", error)
+      //   })
+      // }).catch((error) => {
+      //   console.log(error.code);
+      //   console.log(error.message);
+      // })
+
+    } else {
+
+      this.setState({ todos: modiTodo })
+
+    }
+    // this.setState({ todos: modiTodo })
 
   }
   // Checkbox functioanlity this is in Table Component
@@ -272,21 +273,6 @@ class App extends Component {
     return function (todo) {
       return todo.todoName.toLowerCase().includes(searchTodo.toLowerCase())
     }
-    // const docRef = db.doc('users/a@h.com');
-    // docRef.get().then((doc)=> {
-    //   if (doc.exists) {
-    //     this.setState({todos: doc.data().todos})
-    //   return function (todo) {
-    //     return todo.todoName.toLowerCase().includes(searchTodo.toLowerCase())
-    //   }
-    //   }
-    //   else {
-    //     return function (todo) {
-    //       return todo.todoName.toLowerCase().includes(searchTodo.toLowerCase())
-    //     }
-    //   }
-    // })
-    
   }
   // additionalInfo = (e) => {
   //   this.setState({ todoAddInfoValue: e.target.value });
@@ -329,6 +315,13 @@ class App extends Component {
   }
   loginSubmit = (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password).then(() => {
+      var todoRef = db.doc(`users/${email}`);
+      this.state.todos.map((todo) => {
+        todoRef.update({
+          todos: firebase.firestore.FieldValue.arrayUnion(todo)
+        })
+      })
+      
       this.refs.notify.notificationAlert(optionsFunc(`Login Successufully`, 'success'))
       const docRef = db.doc(`users/${email}`)
       docRef.get().then((doc) =>{
@@ -362,14 +355,14 @@ class App extends Component {
   //       console.log("No such document!");
   //   }})
   // }
-  // signOut = () => {
-  //   firebase.auth().signOut().then(() => {
-  //     console.log("Successefully Sign Out");
-  //   }).catch((error) => {
-  //     console.log(error);
+  signOut = () => {
+    firebase.auth().signOut().then(() => {
+      console.log("Successefully Sign Out");
+    }).catch((error) => {
+      console.log(error);
       
-  //   })
-  // }
+    })
+  }
   render() {
     // var getTodos = db.collection('users').doc('a')
     return (
