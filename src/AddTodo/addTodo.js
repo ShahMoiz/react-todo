@@ -15,8 +15,11 @@ export default class AddTodo extends Component {
         }
     }
     addTodoChild = (e) => {
+        console.log("INput Word Before Set State Call", e.target.value);
         this.setState({todoValue: e.target.value, addTaskValue:e.target.value});
-        (!this.state.addTaskValue) ? this.setState({ disabledAddButton: true }) : this.setState({ disabledAddButton: false });
+        console.log("INput Word after Set State Call", this.state.addTaskValue);
+
+        (!e.target.value) ? this.setState({ disabledAddButton: true }) : this.setState({ disabledAddButton: false });
         // this.props.addTodo(e);
     }
 
