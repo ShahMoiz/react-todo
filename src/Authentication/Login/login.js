@@ -1,5 +1,5 @@
 import  React, {Component} from "react";
-import { MDBBtn, MDBCard, MDBCardBody, MDBCardImage, MDBCardTitle, MDBCardText, MDBInput} from 'mdbreact';
+import { MDBBtn, MDBCard, MDBCardBody, MDBCardImage, MDBCardTitle, MDBInput} from 'mdbreact';
 
 export default class Login extends Component {
     constructor(props){

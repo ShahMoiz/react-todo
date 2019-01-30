@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { MDBBtn } from "mdbreact";
-import { BrowserRouter as Router, Route, Link, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import * as firebase from 'firebase';
 import NotificationAlert from 'react-notification-alert';
 import "react-notification-alert/dist/animate.css";
@@ -98,17 +98,19 @@ class App extends Component {
     this.state = {
       todos: [],
       todosIsEmpty: true,
-      // todoAddInputValue: '',
+      todoAddInputValue: '',
       editTaskAfterAdded: { editButton: false, id: null },
       searchTodoValue: '',
-      // todoAddInfoValue: '',
-      getIsCompleteID: ''
+      todoAddInfoValue: '',
+      getIsCompleteID: '',
+      valueBoo: false,
+      editableTodoValue: ''
 
     }
   }
   componentDidMount() {
     setTimeout(() => {
-      var user = firebase.auth().currentUser;
+      const user = firebase.auth().currentUser;
       
     console.log( "user Not Login", user);
     if(user){
@@ -117,26 +119,8 @@ class App extends Component {
         (doc.exists) && this.setState({todos: doc.data().todos, todosIsEmpty: false})
       })
     }
-    // else {
-    //   console.log( "user Not Login");
-    // }
-    }, 2500);
-      
-      // window.addEventListener('load', this.handleLoad);
+    }, 2000);
    }
-//    handleLoad = () => {
-//     // firebase user Status
-//     var user = firebase.auth().currentUser;
-//     if(user){
-//       var getData = db.doc(`users/${user.email}`);
-//       getData.get().then((doc) => {
-//         (doc.exists) && this.setState({todos: doc.data().todos, todosIsEmpty: false})
-//       })
-//     }
-//     else {
-//       console.log( "user Not Login");
-//     }
-// }
   //Change Input Value have
   // addTodo = (e) => {
   //   this.setState({ todoAddInputValue: e.target.value })
@@ -157,7 +141,7 @@ class App extends Component {
     this.state.todos.push(todoObject);
 
     // firebase user Status
-    var user = firebase.auth().currentUser;
+    const user = firebase.auth().currentUser;
     if (user) {
       var getData = db.doc(`users/${user.email}`);
       getData.set({
@@ -181,30 +165,11 @@ class App extends Component {
 
     }
 
-
+    this.setState({valueBoo: true});
   }
 
 
-
-  editTaskTable = (id) => {
-    const getTask = this.state.todos.filter((todos) => todos.id === id);
-    const editTaskAfterAdded = { editButton: true, id: id }
-    this.refs.notify.notificationAlert(optionsFunc("Edit Enable", 'info'));
-    this.setState({ editTaskAfterAdded, todoAddInputValue: getTask[0].todoName });
-
-  }
-
-  // this func is successefully complete edit this func is in AddTodo component  
-  editTask = () => {
-    const editTaskAfterAdded = { editButton: false, id: null };
-    const fetchID = this.state.editTaskAfterAdded.id;
-    const findReqTodo = this.state.todos.filter((todos) => todos.id === fetchID);
-
-    this.refs.notify.notificationAlert(optionsFunc("Edit Successfully", 'success'));
-    findReqTodo.map(todo => { todo.todoName = this.state.todoAddInputValue; todo.todoAddInfo = this.state.todoAddInfoValue })
-
-    this.setState({ todos: this.state.todos, editTaskAfterAdded, todoAddInputValue: '' });
-  }
+  
   dltTodo = (id) => {
     const modiTodo = this.state.todos.filter((todo) => todo.id !== id);
     console.log("Delete Current Id,", modiTodo);
@@ -212,7 +177,7 @@ class App extends Component {
     this.refs.notify.notificationAlert(optionsFunc("Delete Successfully", 'danger'));
     
     // firebase user Status
-    var user = firebase.auth().currentUser;
+    const user = firebase.auth().currentUser;
     if (user) {
       var getData = db.doc(`users/${user.email}`);
       getData.get().then((doc) => {
@@ -224,7 +189,8 @@ class App extends Component {
             todos: dbgetTodo
           })
         }
-      })
+      }).catch((error) =>  this.refs.notify.notificationAlert(optionsFunc(error.message, 'danger'))
+      )
       // getData.set({
       //   todos: this.state.todos,
       // }).then(() => {
@@ -245,7 +211,47 @@ class App extends Component {
       this.setState({ todos: modiTodo })
 
     }
-    // this.setState({ todos: modiTodo })
+
+  }
+  editTaskTable = (id) => {
+    const getTask = this.state.todos.filter((todos) => todos.id === id);
+    const editTaskAfterAdded = { editButton: true, id: id }
+    this.refs.notify.notificationAlert(optionsFunc("Edit Enable", 'info'));
+    this.setState({ editTaskAfterAdded, todoAddInputValue: getTask[0].todoName });
+
+  }
+
+  // this func is successefully complete edit this func is in AddTodo component  
+  editTask = (id) => {
+    // findReqTodo.map(todo => { todo.todoName = this.state.todoAddInputValue; todo.todoAddInfo = this.state.todoAddInfoValue })
+    // console.log("It Works ", this.state.editableTodoValue)
+    // const editTaskAfterAdded = { editButton: false, id: null };
+    // // const fetchID = this.state.editTaskAfterAdded.id;
+    // const fetchID = id;
+    // console.log("Edit id", fetchID)
+    
+
+    const user = firebase.auth().currentUser
+    if (user) {   
+      const findReqTodo = this.state.todos.filter((todos) => todos.id === id);
+
+    findReqTodo.map(todo => { todo.todoName = this.state.editableTodoValue; todo.todoAddInfo = this.state.todoAddInfoValue })
+
+    // this.setState({ todos: this.state.todos, editTaskAfterAdded, todoAddInputValue: '' });
+    this.setState({ todos: this.state.todos});
+       const userRef = db.doc(`users/${user.email}`)
+
+       userRef.set({
+         todos: this.state.todos
+       }).then(() => {
+        
+        this.refs.notify.notificationAlert(optionsFunc(<div><h5>Edit Successefully</h5><p>Updated Value Stored in Database</p></div>, 'success'));
+      }).catch((error) =>  this.refs.notify.notificationAlert(optionsFunc(error.message, 'danger'))
+      )
+
+    } else {
+    }
+    
 
   }
   // Checkbox functioanlity this is in Table Component
@@ -316,11 +322,11 @@ class App extends Component {
   loginSubmit = (email, password) => {
     firebase.auth().signInWithEmailAndPassword(email, password).then(() => {
       var todoRef = db.doc(`users/${email}`);
-      this.state.todos.map((todo) => {
+      this.state.todos.map((todo) => 
         todoRef.update({
           todos: firebase.firestore.FieldValue.arrayUnion(todo)
         })
-      })
+      )
       
       this.refs.notify.notificationAlert(optionsFunc(`Login Successufully`, 'success'))
       const docRef = db.doc(`users/${email}`)
@@ -343,7 +349,28 @@ class App extends Component {
     })
 
   }
-
+  tableTemplate = () => {
+    return (
+      this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
+        <Table
+          key={todos.id}
+          todos={todos}
+          editTaskTable={this.editTaskTable}
+          dltTodo={this.dltTodo}
+          isComplete={this.isComplete}
+          getID={this.getID}
+          editTodo={this.editTodo}
+          addInfo={this.addInfo}
+          editTask={this.editTask}
+        />)
+    )
+  }
+  editTodo = (e) => {
+    this.setState({editableTodoValue: e.target.value});
+  }
+  addInfo= (e)=> {
+    this.setState({todoAddInfoValue: e.target.value});
+  }
   // check = () => {
   //   const a = db.doc("users/a@h.com");
   //   a.get().then((doc) => {
@@ -391,15 +418,7 @@ class App extends Component {
               
                 { 
                (!this.state.todosIsEmpty) ?
-                this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todos) =>
-                  <Table
-                    key={todos.id}
-                    todos={todos}
-                    editTaskTable={this.editTaskTable}
-                    dltTodo={this.dltTodo}
-                    isComplete={this.isComplete}
-                    getID={this.getID}
-                  />) : "wait while Fetching your data in Server or Either Todos Empty"
+                 this.tableTemplate(): "wait while Fetching your data in Server or Either Todos Empty"
               }
             </div>
           }
@@ -415,15 +434,7 @@ class App extends Component {
                 <Link style={{ color: 'white' }} to={`${match.url}/incompleteTodo`}><MDBBtn color="purple">Show Incomplete Todo</MDBBtn></Link>
 
                 {
-                  this.state.todos.filter(this.filterTodo(this.state.searchTodoValue)).map((todo) =>
-                    <Table
-                      todos={todo}
-                      editTaskTable={this.editTaskTable}
-                      dltTodo={this.dltTodo}
-                      isComplete={this.isComplete}
-                      getID={this.getID}
-                    />
-                  )
+                  this.tableTemplate()
                 }
               </div>
           }
@@ -434,7 +445,8 @@ class App extends Component {
               return (
                 <div>
                   <h6><Link to="/todos">Back to Todos</Link></h6>
-                  {this.state.todos.filter((todo) => {
+                  {
+                    this.state.todos.filter((todo) => {
                     if (match.params.id === 'completeTodo' && todo.isCompleted) {
                       return todo
                     }
@@ -442,12 +454,7 @@ class App extends Component {
                       return todo
                     }
                   }).filter(this.filterTodo(this.state.searchTodoValue)).map((todo) =>
-                    <Table
-                      todos={todo}
-                      editTaskTable={this.editTaskTable}
-                      dltTodo={this.dltTodo}
-                      isComplete={this.isComplete}
-                    />
+                  this.tableTemplate()
                   )
                   }
                 </div>
