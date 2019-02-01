@@ -43,21 +43,19 @@ render() {
               </div>
             </MDBFormInline>
           </MDBNavItem>
-          {/* <MDBNavItem> */}
-            {/* <MDBNavLink className="waves-effect waves-light" to="#!"> */}
-              {/* <MDBIcon fab icon="google-plus-g" /> */}
-            {/* </MDBNavLink> */}
-          {/* </MDBNavItem> */}
           <MDBNavItem>
             <MDBDropdown>
               <MDBDropdownToggle nav caret>
                 <MDBIcon icon="user" />
               </MDBDropdownToggle>
               <MDBDropdownMenu className="dropdown-default" right>
-                <MDBDropdownItem href="#!">Action</MDBDropdownItem>
-                <MDBDropdownItem href="#!">Another Action</MDBDropdownItem>
-                <MDBDropdownItem href="#!">Something else here</MDBDropdownItem>
-                <MDBDropdownItem href="#!">Something else here</MDBDropdownItem>
+              {
+                (this.props.username) ?<div>< MDBDropdownItem href="#!">Welcome <b style={{'fontSize': '16px'}}>{this.props.username}</b></MDBDropdownItem>
+                <MDBDropdownItem onClick={() => this.props.signOut()}>Signout</MDBDropdownItem></div> :
+                <div><MDBDropdownItem href="/login">signIn</MDBDropdownItem>
+                <MDBDropdownItem href="/auth">signUp</MDBDropdownItem></div>
+              }
+                
               </MDBDropdownMenu>
             </MDBDropdown>
           </MDBNavItem>

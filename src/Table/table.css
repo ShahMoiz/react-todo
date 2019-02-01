@@ -1,60 +1,43 @@
 
-.check {
-    cursor: pointer;
-    position: relative;
-    margin: auto;
-    width: 18px;
-    height: 18px;
-    -webkit-tap-highlight-color: transparent;
-    transform: translate3d(0, 0, 0);
-  }
-  .check:before {
-    content: "";
-    position: absolute;
-    top: -15px;
-    left: -15px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(34,50,84,0.03);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-  .check svg {
-    position: relative;
-    z-index: 1;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke: #c8ccd4;
-    stroke-width: 1.5;
-    transform: translate3d(0, 0, 0);
-    transition: all 0.2s ease;
-  }
-  .check svg path {
-    stroke-dasharray: 60;
-    stroke-dashoffset: 0;
-  }
-  .check svg polyline {
-    stroke-dasharray: 22;
-    stroke-dashoffset: 66;
-  }
-  .check:hover:before {
-    opacity: 1;
-  }
-  .check:hover svg {
-    stroke: #4285f4;
-  }
-  #cbx:checked + .check svg {
-    stroke: #4285f4;
-  }
-  #cbx:checked + .check svg path {
-    stroke-dashoffset: 60;
-    transition: all 0.3s linear;
-  }
-  #cbx:checked + .check svg polyline {
-    stroke-dashoffset: 42;
-    transition: all 0.2s linear;
-    transition-delay: 0.15s;
-  }
-  
+.check input {
+  display: none;
+}
+.check input:checked + .box {
+  background-color: #b3ffb7;
+}
+.check input:checked + .box:after {
+  top: 0;
+}
+.check .box {
+  width: 25px;
+  height: 25px;
+  transition: all 1.1s cubic-bezier(0.19, 1, 0.22, 1);
+  border: 2px solid transparent;
+  background-color: white;
+  position: sticky;
+  overflow: hidden;
+  cursor: pointer;
+  top: 99%;
+  right: 65px;
+  box-shadow: 0 5px rgba(0, 0, 0, 0.2);
+}
+.check .box:after {
+  width: 50%;
+  height: 20%;
+  content: '';
+  position: absolute;
+  border-left: 7.5px solid;
+  border-bottom: 7.5px solid;
+  border-color: #40c540;
+  transform: rotate(-45deg) translate3d(0, 0, 0);
+  transform-origin: center center;
+  transition: all 1.1s cubic-bezier(0.19, 1, 0.22, 1);
+  left: 0;
+  right: 0;
+  top: 200%;
+  bottom: 5%;
+  margin: auto;
+}
+*, ::after, ::before {
+  box-sizing: unset;
+}
